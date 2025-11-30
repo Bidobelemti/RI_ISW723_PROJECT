@@ -11,10 +11,15 @@ nltk.download('stopwords')
 stemmer = porter.PorterStemmer()
 stop_words = set(stopwords.words('english'))
 
+# Preprocesamiento de texto
+
 def clean_text(doc):
     """
     Limpia y normaliza texto: conversión a minúsculas y eliminación de caracteres no alfabéticos.
-    SOLO limpieza básica - NO incluye stemming ni stopwords.
+    ### Input:
+             doc: string
+    ### Output:
+             doc: string
 
     """
     doc = unicodedata.normalize('NFKD', doc).encode('ascii', 'ignore').decode('utf-8').lower()
@@ -27,7 +32,11 @@ def clean_text(doc):
 
 def remove_stopwords(doc):
     """
-    Elimina stopwords del documento.
+    Elimina stopwords del documento. Toma la lista de stop_words en inles de NLTK
+    ### Input:
+             doc: string
+    ### Output:
+             doc: string
     """
     tokens = doc.split()
     return ' '.join(word for word in tokens if word not in stop_words)
@@ -35,6 +44,10 @@ def remove_stopwords(doc):
 def stemming(doc):
     """
     Aplica stemming a todas las palabras del documento usando PorterStemmer.
+    ### Input:
+             doc: string
+    ### Output:
+             doc: string
     """
     tokens = doc.split()
     return ' '.join(stemmer.stem(word) for word in tokens)
@@ -42,6 +55,10 @@ def stemming(doc):
 def filter_tokens(doc):
     """
     Filtra tokens por longitud, patrones válidos y estructura de palabras.
+    ### Input:
+             doc: string
+    ### Output:
+             doc: string
     """
     tokens = doc.split()
     
@@ -58,8 +75,25 @@ def filter_tokens(doc):
 def build_vocabulary(docs):
     """
     Construye vocabulario ordenado alfabéticamente a partir de los documentos.
+    ### Input:
+             docs: pd.DataFrame
+    ### Output:
+             vocab: conjunto ordenado del vocabulario de todos los docs  
     """
     return sorted(set(word for doc in docs for word in doc.split()))
+
+# Modelo binario
+
+def jaccard_similarity(vec1, vec2):
+    intersection = np.sum(np.logical_and(vec1 == 1, vec2 == 1))
+    union = np.sum(np.logical_or(vec1 == 1, vec2 == 1))
+    
+    if union == 0:
+        return 0.0
+    
+    return intersection / union
+
+# Modelo TFIDF
 
 def get_tf(doc, vocab, vocab_len):
     """
@@ -102,6 +136,8 @@ def calculate_cos_similarity(corpus_tfidf, query_tfidf):
     return np.dot(corpus_tfidf, query_tfidf.flatten()) / (
         np.linalg.norm(corpus_tfidf, axis=1) * np.linalg.norm(query_tfidf) + 1e-9
     )
+
+# Modelo okapi BM25
 
 def avgdl(docs_tokenized):
     """
