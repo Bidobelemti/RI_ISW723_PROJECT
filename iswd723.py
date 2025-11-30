@@ -196,4 +196,8 @@ def make_index_inv(docs):
     # Se retorna el índice invertido ordenado por las palabras
     return dict(sorted(indice_invertido.items()))
 
-
+def get_binary_vector (doc):
+    '''
+    Función obtiene vector binario a partir de un tf 
+    '''
+    return np.array([1 if val != 0 else 0 for val in doc])
