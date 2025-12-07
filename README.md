@@ -12,7 +12,7 @@ El sistema implementa los siguientes modelos de recuperación:
 2. **TF-IDF (Term Frequency - Inverse Document Frequency):** Utiliza matrices dispersas (sparse matrices) para eficiencia en memoria.
 3. **BM25 (Best Matching 25):** Modelo probabilístico avanzado que considera la longitud del documento y la saturación de términos.
 
-## 🛠️ Requisitos Previos
+## Requisitos Previos
 
 El proyecto está construido en **Python 3**.
 
@@ -22,7 +22,7 @@ El código hace uso de `pandas`, `numpy` y `scipy`. Para instalar todo lo necesa
 pip install -r requirements.txt
 ```
 
-## 📂 Configuración del Dataset
+## Configuración del Dataset
 
 Para que el sistema funcione, es **obligatorio** descargar el dataset de noticias.
 
