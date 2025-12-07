@@ -153,6 +153,87 @@ class JaccardRI(IRProject):
         return self.ranked_indices, self.scores[self.ranked_indices]
 
 # ---------------------------------------------------------
+# EVALUACIÓN
+# ---------------------------------------------------------
+
+def load_qrels(path):
+    qrels = {}
+
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            qid, _, docid, rel = line.strip().split()
+
+            if int(rel) > 0:
+                if qid not in qrels:
+                    qrels[qid] = set()
+                qrels[qid].add(int(docid))
+
+    return qrels
+
+def load_queries(path):
+    queries = {}
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            qid, text = line.strip().split(" ", 1)
+            queries[qid] = text
+    return queries
+
+def precision_at_k(ranking, relevant, k):
+    retrieved = ranking[:k]
+    hits = sum(1 for d in retrieved if d in relevant)
+    return hits / k
+
+def recall_at_k(ranking, relevant, k):
+    retrieved = ranking[:k]
+    hits = sum(1 for d in retrieved if d in relevant)
+    if len(relevant) == 0:
+        return 0.0
+    return hits / len(relevant)
+
+def average_precision(ranking, relevant):
+    hits = 0
+    sum_prec = 0.0
+
+    for i, doc_id in enumerate(ranking):
+        if doc_id in relevant:
+            hits += 1
+            sum_prec += hits / (i + 1)
+
+    if len(relevant) == 0:
+        return 0.0
+
+    return sum_prec / len(relevant)
+
+
+def evaluate_model(model, queries, qrels, K=10):
+    aps = []
+    precisions = []
+    recalls = []
+
+    for qid, qtext in queries.items():
+        relevant = qrels.get(qid, set())
+
+        model.setQuery(qtext)
+        model.rank()
+        ranking, _ = model.getRankedDocs()
+
+        ranking = ranking.tolist()
+
+        ap = average_precision(ranking, relevant)
+        p = precision_at_k(ranking, relevant, K)
+        r = recall_at_k(ranking, relevant, K)
+
+        aps.append(ap)
+        precisions.append(p)
+        recalls.append(r)
+
+    return {
+        "MAP": np.mean(aps),
+        "Precision@K": np.mean(precisions),
+        "Recall@K": np.mean(recalls),
+    }
+
+# ---------------------------------------------------------
 # PROGRAMA PRINCIPAL — CLI
 # ---------------------------------------------------------
 if __name__ == "__main__":
@@ -193,7 +274,29 @@ if __name__ == "__main__":
             print("Modelo inválido.")
             continue
         if model_choice == "eval":
-            print("Modo de evaluación no implementado en este snippet.")
+            try:
+                qrels = load_qrels("src/qrels.txt")
+                queries = load_queries("src/queries.txt")
+                print("\nEvaluando Jaccard...")
+                j_metrics = evaluate_model(jaccard_model, queries, qrels)
+
+                print("\nEvaluando TF-IDF...")
+                t_metrics = evaluate_model(tfidf_model, queries, qrels)
+
+                print("\nEvaluando BM25...")
+                b_metrics = evaluate_model(bm25_model, queries, qrels)
+
+                print("\n================ RESULTADOS ================\n")
+                print("JACCARD")
+                print(j_metrics)
+                print("\nTF-IDF")
+                print(t_metrics)
+                print("\nBM25")
+                print(b_metrics)
+                print("\n===========================================\n")
+            except Exception as e:
+                print(f"Error durante la evaluación: {e}")
+                continue
             continue
         else:
             query = input("Consulta: ").strip()
