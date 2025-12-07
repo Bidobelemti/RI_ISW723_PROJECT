@@ -1,4 +1,6 @@
-#re
+re
 pandas
 nltk
 numpy
+scipy
+sklearn
