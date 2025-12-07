@@ -38,7 +38,7 @@ PROYECTO/
 ├── data/
 │   └── bbc_news.csv       <-- Archivo descargado obligatorio
 ├── src/
-│   └── iswd723.py         <-- Módulo con funciones de preprocesamiento
+│   └── iswd753.py         <-- Módulo con funciones de preprocesamiento
 ├── main.py                <-- Archivo principal de ejecución
 ├── requirements.txt
 └── README.md
